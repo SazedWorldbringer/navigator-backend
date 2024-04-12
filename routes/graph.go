@@ -8,26 +8,25 @@ import (
 	"github.com/SazedWorldbringer/navigator-backend/internal/dijkstra"
 )
 
-type reqBody struct {
+type graphReq struct {
 	Vertices int `json:"vertices"`
-	Edges    int `json:"edges"`
 }
 
-func GenerateRandomGraph(vertices, edges int) dijkstra.WeightedAdjacencyList {
+func generateRandomGraph(vertices int, prob float64) dijkstra.WeightedAdjacencyList {
 	graph := make(dijkstra.WeightedAdjacencyList, vertices)
 	for i := range graph {
 		graph[i] = make([]dijkstra.Edge, 0)
 	}
 
-	for i := 0; i < edges; i++ {
-		from := rand.Intn(vertices)
-		to := rand.Intn(vertices)
-		weight := rand.Intn(10) + 1
-
-		if from != to && !contains(graph[from], to) {
-			graph[from] = append(graph[from], dijkstra.Edge{To: to, Weight: weight})
+	for from := 0; from < vertices; from++ {
+		for to := from + 1; to < vertices; to++ {
+			if from != to && rand.Float64() < prob {
+				weight := rand.Intn(10) + 1
+				graph[from] = append(graph[from], dijkstra.Edge{To: to, Weight: weight})
+			}
 		}
 	}
+
 	return graph
 }
 
@@ -41,14 +40,14 @@ func contains(edges []dijkstra.Edge, to int) bool {
 }
 
 func GraphHandler(w http.ResponseWriter, r *http.Request) {
-	var req reqBody
+	var req graphReq
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	graph := GenerateRandomGraph(req.Vertices, req.Edges)
+	graph := generateRandomGraph(req.Vertices, 0.2)
 	jsonResponse, err := json.Marshal(graph)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

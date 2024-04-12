@@ -12,6 +12,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/graph", http.HandlerFunc(routes.GraphHandler))
+	mux.Handle("/path", http.HandlerFunc(routes.ShortestPathHandler))
 
 	corsMux := middlewareCors(mux)
 

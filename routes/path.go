@@ -8,9 +8,9 @@ import (
 )
 
 type pathReq struct {
-	Source int                            `json:"source"`
-	Sink   int                            `json:"sink"`
-	Graph  dijkstra.WeightedAdjacencyList `json:"graph"`
+	Source int    `json:"source"`
+	Sink   int    `json:"sink"`
+	Graph  string `json:"graph"`
 }
 
 func ShortestPathHandler(w http.ResponseWriter, r *http.Request) {
@@ -20,8 +20,13 @@ func ShortestPathHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	graph := dijkstra.WeightedAdjacencyList{}
+	err = json.Unmarshal([]byte(req.Graph), &graph)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 
-	path := dijkstra.DijkstraPath(req.Source, req.Sink, req.Graph)
+	path := dijkstra.DijkstraPath(req.Source, req.Sink, graph, []int{})
 	jsonResponse, err := json.Marshal(path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

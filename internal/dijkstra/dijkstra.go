@@ -38,7 +38,7 @@ func getLowestUnseen(seen []bool, dists []int) int {
 	return idx
 }
 
-func DijkstraPath(source, sink int, graph WeightedAdjacencyList) []int {
+func DijkstraPath(source, sink int, graph WeightedAdjacencyList, intermediates []int) []int {
 	seen := make([]bool, len(graph))
 
 	prev := make([]int, len(graph))
